@@ -2,8 +2,8 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BarChart3, User, Search, Filter, Settings, LogIn, Eye } from "lucide-react";
 import { BarChart, Shield, Users, Activity, FileText, Globe, MonitorCog } from "lucide-react";
+import { LogIn, Eye, User, Search, Filter, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -27,6 +27,10 @@ const AuditLogs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const logsPerPage = 10;
+
   const menuItems = [
     { label: "Dashboard", href: "/admin/dashboard", icon: BarChart },
     { label: "System Status", href: "/admin/system-status", icon: MonitorCog },
@@ -45,9 +49,8 @@ const AuditLogs = () => {
       });
 
       const logsArray = Array.isArray(res.data.data) ? res.data.data : [];
-
-      // Add new logs on top of existing logs
-      setAuditLogs((prevLogs) => [...logsArray.reverse(), ...prevLogs]);
+      // Latest logs on top
+      setAuditLogs(logsArray.reverse());
     } catch (err) {
       console.error("Error fetching audit logs:", err);
       setError("Failed to load audit logs. Please try again.");
@@ -58,39 +61,25 @@ const AuditLogs = () => {
 
   useEffect(() => {
     fetchAuditLogs();
-
-    // Optional: Polling every 10s for new logs
-    const interval = setInterval(fetchAuditLogs, 10000);
-    return () => clearInterval(interval);
   }, []);
 
   const getActionIcon = (type?: string) => {
     switch (type) {
-      case "auth":
-        return <LogIn className="w-4 h-4 text-blue-600" />;
-      case "security":
-        return <Shield className="w-4 h-4 text-red-600" />;
-      case "profile":
-        return <User className="w-4 h-4 text-green-600" />;
-      case "access":
-        return <Eye className="w-4 h-4 text-purple-600" />;
-      default:
-        return <Settings className="w-4 h-4 text-gray-600" />;
+      case "auth": return <LogIn className="w-4 h-4 text-blue-600" />;
+      case "security": return <Shield className="w-4 h-4 text-red-600" />;
+      case "profile": return <User className="w-4 h-4 text-green-600" />;
+      case "access": return <Eye className="w-4 h-4 text-purple-600" />;
+      default: return <Settings className="w-4 h-4 text-gray-600" />;
     }
   };
 
   const getActionBadge = (type?: string) => {
     switch (type) {
-      case "auth":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "security":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "profile":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "access":
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+      case "auth": return "bg-blue-100 text-blue-800 border-blue-200";
+      case "security": return "bg-red-100 text-red-800 border-red-200";
+      case "profile": return "bg-green-100 text-green-800 border-green-200";
+      case "access": return "bg-purple-100 text-purple-800 border-purple-200";
+      default: return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
@@ -101,6 +90,12 @@ const AuditLogs = () => {
     const matchesFilter = filterType === "all" || log.type === filterType;
     return matchesSearch && matchesFilter;
   });
+
+  // Pagination logic
+  const indexOfLastLog = currentPage * logsPerPage;
+  const indexOfFirstLog = indexOfLastLog - logsPerPage;
+  const currentLogs = filteredLogs.slice(indexOfFirstLog, indexOfLastLog);
+  const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
 
   if (loading) return <p className="text-center p-4">Loading audit logs...</p>;
   if (error) return <p className="text-center p-4 text-red-600">{error}</p>;
@@ -154,12 +149,12 @@ const AuditLogs = () => {
             <CardTitle>Activity History ({filteredLogs.length} entries)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {filteredLogs.length === 0 && (
+            {currentLogs.length === 0 && (
               <p className="text-center py-8 text-muted-foreground">
                 No activities match your current filters.
               </p>
             )}
-            {filteredLogs.map((log) => (
+            {currentLogs.map((log) => (
               <div key={log._id} className="border rounded-lg p-4 flex justify-between items-start space-x-3">
                 <div className="flex items-start space-x-3">
                   {getActionIcon(log.type)}
@@ -182,6 +177,35 @@ const AuditLogs = () => {
             ))}
           </CardContent>
         </Card>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center space-x-2">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+            {[...Array(totalPages)].map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentPage(idx + 1)}
+                className={`px-3 py-1 border rounded ${currentPage === idx + 1 ? "bg-blue-500 text-white" : ""}`}
+              >
+                {idx + 1}
+              </button>
+            ))}
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
