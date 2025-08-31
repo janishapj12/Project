@@ -25,7 +25,7 @@ const UserStatistics = () => {
     { label: "Security Reports", href: "/admin/security-reports", icon: Shield },
     { label: "Blockchain", href: "/admin/blockchain", icon: Globe },
     { label: "System Logs", href: "/admin/system-logs", icon: Activity },
-      { label: "Audit Logs", href: "/user/audit-logs", icon: FileText },
+      { label: "Audit Logs", href: "/admin/audit-logs", icon: FileText },
   ];
 
   // Fetch users from backend
