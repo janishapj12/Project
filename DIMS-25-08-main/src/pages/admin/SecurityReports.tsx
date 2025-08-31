@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Shield, Users, Activity, AlertTriangle, CheckCircle, XCircle, Eye, Globe, MonitorCog } from "lucide-react";
+import { BarChart, Shield, Users, Activity, AlertTriangle, CheckCircle, XCircle, Eye, Globe, MonitorCog,FileText } from "lucide-react";
 
 const SecurityReports = () => {
   const menuItems = [
@@ -10,6 +10,7 @@ const SecurityReports = () => {
     { label: "Security Reports", href: "/admin/security-reports", icon: Shield },
     { label: "Blockchain", href: "/admin/blockchain", icon: Globe },
     { label: "System Logs", href: "/admin/system-logs", icon: Activity },
+    { label: "Audit Logs", href: "/admin/audit-logs", icon: FileText },
     
   ];
 

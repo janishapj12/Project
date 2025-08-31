@@ -10,6 +10,7 @@ const BlockChain = () => {
     { label: "Security Reports", href: "/admin/security-reports", icon: Shield },
     { label: "Blockchain", href: "/admin/blockchain", icon: Globe },
     { label: "System Logs", href: "/admin/system-logs", icon: Activity },
+    { label: "Audit Logs", href: "/admin/audit-logs", icon: FileText },
     
   ];
 

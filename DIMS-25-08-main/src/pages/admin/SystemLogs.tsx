@@ -2,7 +2,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BarChart, Shield, Users, Activity, Search, Filter, AlertCircle, CheckCircle, Info, AlertTriangle, Globe, MonitorCog } from "lucide-react";
+import { BarChart, Shield, Users, Activity, Search, Filter, AlertCircle, CheckCircle, Info, AlertTriangle, Globe, MonitorCog,FileText } from "lucide-react";
 import { useState } from "react";
 
 const SystemLogs = () => {
@@ -16,6 +16,7 @@ const SystemLogs = () => {
     { label: "Security Reports", href: "/admin/security-reports", icon: Shield },
     { label: "Blockchain", href: "/admin/blockchain", icon: Globe },
     { label: "System Logs", href: "/admin/system-logs", icon: Activity },
+    { label: "Audit Logs", href: "/admin/audit-logs", icon: FileText },
   ];
 
   const logs = [

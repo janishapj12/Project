@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart3, User, Search, Filter, Settings, LogIn, Eye } from "lucide-react";
-import { BarChart, Shield, Users, Activity, AlertTriangle, Server, Globe, MonitorCog ,FileText} from "lucide-react";
+import { BarChart, Shield, Users, Activity, FileText, Globe, MonitorCog } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -28,7 +28,7 @@ const AuditLogs = () => {
   const [error, setError] = useState<string | null>(null);
 
   const menuItems = [
-     { label: "Dashboard", href: "/admin/dashboard", icon: BarChart },
+    { label: "Dashboard", href: "/admin/dashboard", icon: BarChart },
     { label: "System Status", href: "/admin/system-status", icon: MonitorCog },
     { label: "User Statistics", href: "/admin/user-statistics", icon: Users },
     { label: "Security Reports", href: "/admin/security-reports", icon: Shield },
@@ -39,19 +39,18 @@ const AuditLogs = () => {
 
   const fetchAuditLogs = async () => {
     try {
-      setLoading(true);
-      setError(null);
       const token = localStorage.getItem("authToken");
       const res = await axios.get("http://localhost:5000/api/audit-logs", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const logsArray = Array.isArray(res.data.data) ? res.data.data : [];
-      setAuditLogs(logsArray);
+
+      // Add new logs on top of existing logs
+      setAuditLogs((prevLogs) => [...logsArray.reverse(), ...prevLogs]);
     } catch (err) {
       console.error("Error fetching audit logs:", err);
       setError("Failed to load audit logs. Please try again.");
-      setAuditLogs([]);
     } finally {
       setLoading(false);
     }
@@ -59,6 +58,10 @@ const AuditLogs = () => {
 
   useEffect(() => {
     fetchAuditLogs();
+
+    // Optional: Polling every 10s for new logs
+    const interval = setInterval(fetchAuditLogs, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const getActionIcon = (type?: string) => {
@@ -103,9 +106,8 @@ const AuditLogs = () => {
   if (error) return <p className="text-center p-4 text-red-600">{error}</p>;
 
   return (
-    <DashboardLayout menuItems={menuItems} title="User Dashboard">
+    <DashboardLayout menuItems={menuItems} title="Admin Dashboard">
       <div className="space-y-6">
-        {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-foreground">Audit Logs</h1>
           <p className="text-muted-foreground">View your account activity and security events</p>
