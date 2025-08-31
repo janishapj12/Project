@@ -24,7 +24,6 @@ const AuditLogs = () => {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Pagination
@@ -47,15 +46,11 @@ const AuditLogs = () => {
       const res = await axios.get("http://localhost:5000/api/audit-logs", {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const logsArray = Array.isArray(res.data.data) ? res.data.data : [];
-      // Latest logs on top
       setAuditLogs(logsArray.reverse());
     } catch (err) {
       console.error("Error fetching audit logs:", err);
       setError("Failed to load audit logs. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -91,14 +86,10 @@ const AuditLogs = () => {
     return matchesSearch && matchesFilter;
   });
 
-  // Pagination logic
   const indexOfLastLog = currentPage * logsPerPage;
   const indexOfFirstLog = indexOfLastLog - logsPerPage;
   const currentLogs = filteredLogs.slice(indexOfFirstLog, indexOfLastLog);
   const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
-
-  if (loading) return <p className="text-center p-4">Loading audit logs...</p>;
-  if (error) return <p className="text-center p-4 text-red-600">{error}</p>;
 
   return (
     <DashboardLayout menuItems={menuItems} title="Admin Dashboard">
@@ -144,6 +135,7 @@ const AuditLogs = () => {
         </Card>
 
         {/* Activity History */}
+        {error && <p className="text-center text-red-600">{error}</p>}
         <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Activity History ({filteredLogs.length} entries)</CardTitle>
