@@ -164,7 +164,6 @@ exports.deleteUser = async (req, res) => {
 };
 
 // MetaMask login
-// userController.js
 exports.metamaskLogin = async (req, res) => {
   const { walletAddress } = req.body;
   if (!walletAddress) return res.status(400).json({ success: false, message: "Wallet address is required" });
