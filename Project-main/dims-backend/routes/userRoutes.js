@@ -7,7 +7,8 @@ const {
   getUsers,
   getUserById,
   updateUser,
-  deleteUser
+  deleteUser,
+  metamaskLogin
 
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
@@ -21,6 +22,7 @@ router.get('/', protect, authorizeRoles('admin'), getUsers);
 router.get('/:id', protect, getUserById);
 router.put('/:id', protect, updateUser);
 router.delete('/:id', protect, authorizeRoles('admin'), deleteUser);
+router.post('/metamask-login',metamaskLogin);
 
 
 

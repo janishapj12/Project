@@ -35,7 +35,6 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            
             {/* Admin Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/system-status" element={<SystemStatus />} />
@@ -44,6 +43,7 @@ const App = () => (
             <Route path="/admin/security-reports" element={<SecurityReports />} />
             <Route path="/admin/system-logs" element={<SystemLogs />} />
             <Route path="/admin/blockchain" element={<BlockChain />} />
+            
            
         
             

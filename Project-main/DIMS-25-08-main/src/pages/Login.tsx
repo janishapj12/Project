@@ -8,16 +8,55 @@ import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { User, Wallet } from "lucide-react";
 import HeroGradient from "@/components/HeroGradient/HeroGradient";
+import axios from "axios";
+
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [account, setAccount] = useState<string | null>(null);
 
+  // ==================== MetaMask login ====================
+  const connectWallet = async () => {
+    if (!window.ethereum) return alert("Please install MetaMask");
+
+    setLoading(true);
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      if (!accounts || accounts.length === 0) throw new Error("No accounts found");
+
+      const walletAddress = accounts[0];
+      setAccount(walletAddress);
+
+      // Call backend MetaMask login
+      const response = await axios.post("http://localhost:5000/api/users/metamask-login", { walletAddress });
+      const token = response.data.data.token;
+
+      localStorage.setItem("authToken", token);
+
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      if (payload.role === "admin") navigate("/admin/dashboard");
+      else navigate("/user/dashboard");
+
+      toast({ title: "Wallet connected", description: "Welcome!" });
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Error", description: "Failed to connect wallet", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ==================== Email/Password login ====================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -25,19 +64,18 @@ const Login = () => {
     try {
       const success = await login(email, password);
       if (success) {
-        toast({ title: "Login successful", description: "Welcome back!" });
-
-        // Get role directly from stored token
         const token = localStorage.getItem("authToken");
         const payload = token ? JSON.parse(atob(token.split(".")[1])) : null;
 
         if (payload?.role === "admin") navigate("/admin/dashboard");
         else navigate("/user/dashboard");
 
+        toast({ title: "Login successful", description: "Welcome back!" });
       } else {
         toast({ title: "Login failed", description: "Invalid credentials", variant: "destructive" });
       }
     } catch (err) {
+      console.error(err);
       toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
     } finally {
       setLoading(false);
@@ -86,6 +124,15 @@ const Login = () => {
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Signing in..." : "Sign In"}
+              </Button>
+              <Button
+                onClick={connectWallet}
+                type="button"
+                className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-3 rounded-lg font-medium hover:from-orange-600 hover:to-pink-600 transition-all duration-200"
+                disabled={loading}
+              >
+                <Wallet className="w-5 h-5 inline-block mr-2" />
+                {loading ? "Connecting..." : "Connect MetaMask"}
               </Button>
             </form>
             <div className="mt-4 text-center text-sm text-neutral-200">

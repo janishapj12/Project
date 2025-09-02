@@ -162,3 +162,50 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+// MetaMask login
+// userController.js
+exports.metamaskLogin = async (req, res) => {
+  const { walletAddress } = req.body;
+  if (!walletAddress) return res.status(400).json({ success: false, message: "Wallet address is required" });
+
+  try {
+    let user = await User.findOne({ walletAddress });
+
+    if (!user) {
+      user = new User({
+        username: walletAddress,
+        email: walletAddress + "@metamask.com",
+        full_name: walletAddress,
+        password: "", // empty for MetaMask login
+        role: "user",
+        walletAddress
+      });
+      await user.save();
+    }
+
+    const token = jwt.sign(
+      { id: user._id, username: user.username, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // ✅ Send both token and user
+    res.status(200).json({
+      success: true,
+      data: {
+        token,
+        user: {
+          id: user._id,
+          username: user.username,
+          role: user.role,
+          walletAddress: user.walletAddress
+        }
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
